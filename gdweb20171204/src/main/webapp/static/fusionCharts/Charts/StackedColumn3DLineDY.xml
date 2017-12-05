@@ -1,0 +1,35 @@
+<chart palette='2' caption='Sales Chart' showvalues='0' numberPrefix='$' PYAxisName='Sales' SYAxisName='Quantity'>
+
+   <categories>
+      <category label='2001' />
+      <category label='2002' />
+      <category label='2003' />
+      <category label='2004' />
+      <category label='2005' />
+   </categories>
+
+   <dataset seriesName='Product A'>
+      <set value='25601' />
+      <set value='20148' />
+      <set value='17372' />
+      <set value='35407' />
+      <set value='38105' />
+   </dataset>
+
+   <dataset seriesName='Product B'>
+      <set value='57401' /> 
+      <set value='41941' />
+      <set value='45263' />
+      <set value='117320' />
+      <set value='114845' />
+   </dataset>
+
+   <dataset seriesName='Quantity' parentYAxis='S' >
+      <set value='4500' />
+      <set value='4483' />
+      <set value='4283' />
+      <set value='7755' />
+      <set value='9263' />
+   </dataset>
+
+</chart>

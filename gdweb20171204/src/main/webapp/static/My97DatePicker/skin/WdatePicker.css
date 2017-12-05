@@ -1,0 +1,17 @@
+.Wdate{
+	border:#999 1px solid;
+	height:20px;
+	background:#fff url(datePicker.gif) no-repeat right;
+}
+.inputworks{
+border: 1px solid #e4e4e4;
+    height: 28px;
+    width: 207px;
+    padding: 0px 8px;
+    line-height: 28px;
+    color: #c7c7c7;
+    background: #fff url(datePicker.gif) no-repeat right;}
+.WdateFmtErr{
+	font-weight:bold;
+	color:red;
+}

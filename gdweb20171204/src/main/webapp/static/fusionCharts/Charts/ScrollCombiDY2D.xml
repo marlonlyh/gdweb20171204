@@ -1,0 +1,53 @@
+<chart caption='Sales Volume' PYAxisName='Revenue' SYAxisName='Quantity' showvalues='0' numberPrefix='$' numVisiblePlot='8'
+ useRoundEdges='1' palette='4'>
+
+   <categories>
+      <category label='Jan' />
+      <category label='Feb' />
+      <category label='Mar' />
+      <category label='Apr' />
+      <category label='May' />
+      <category label='Jun' />
+      <category label='Jul' />
+      <category label='Aug' />
+      <category label='Sep' />
+      <category label='Oct' />
+      <category label='Nov' />
+      <category label='Dec' />
+   </categories>
+
+ <dataset seriesName='Quantity' parentYAxis='S'>
+      <set value='340' />
+      <set value='120' />
+      <set value='280' />
+      <set value='270' />
+      <set value='430' />
+      <set value='240' />
+      <set value='230' />
+      <set value='310' />
+      <set value='430' />
+      <set value='180' />
+      <set value='260' />
+      <set value='200' />
+   </dataset>
+
+   <dataset seriesName='Revenue'>
+      <set value='1700000' />
+      <set value='610000' />
+      <set value='1420000' />
+      <set value='1350000' />
+      <set value='2140000' />
+      <set value='1210000' />
+      <set value='1130000' />
+      <set value='1560000' />
+      <set value='2120000' />
+      <set value='900000' />
+      <set value='1320000' />
+      <set value='1010000' />
+   </dataset>
+
+   <trendLines>
+      <line startValue='2100000' color='009933' displayvalue='Target' /> 
+   </trendLines>
+
+</chart> 

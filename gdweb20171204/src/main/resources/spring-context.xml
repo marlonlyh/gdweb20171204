@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jdbc="http://www.springframework.org/schema/jdbc"  
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd"
+	default-lazy-init="true">
+
+	<description>Spring Configuration</description>
+	
+    <!-- 加载配置属性文件 -->
+	<context:property-placeholder ignore-unresolvable="true" location="classpath*:/cms.properties" />
+	
+	<!-- 使用Annotation自动注册Bean，解决事物失效问题：在主容器中不扫描@Controller注解，在SpringMvc中只扫描@Controller注解。  -->
+	<context:component-scan base-package="com.whir.ht"><!-- base-package 如果多个，用“,”分隔 -->
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<!-- 定义Hibernate Session工厂 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"> 
+		<property name="dataSource" ref="dataSource"/>
+		<property name="packagesToScan" value="com.whir.ht"/><!-- 如果多个，用“,”分隔 -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+				<prop key="net.sf.ehcache.configurationResourceName">${hibernate.ehcache.configFile}</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.cache.use_query_cache">true</prop>
+				<prop key="hibernate.search.default.directory_provider">filesystem</prop>
+				<prop key="hibernate.search.default.indexBase">${hibernate.search.default.indexBase}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<!-- <prop key="hibernate.dialect">${hibernate.dialect}</prop>	
+				<prop key="hibernate.hbm2ddl.auto">update</prop> -->
+			</props>
+		</property>
+		
+		<property name="namingStrategy">
+			<bean class="org.hibernate.cfg.ImprovedNamingStrategy" />
+		</property>
+	</bean>
+       
+	<!-- 定义事务 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">  
+        <property name="sessionFactory" ref="sessionFactory" />  
+    </bean>
+    
+	<!-- 配置 Annotation 驱动，扫描@Transactional注解的类定义事务  -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+	
+	<!-- 配置 JSR303 Bean Validator 定义 -->
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
+	<!-- 缓存配置 -->
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:${ehcache.configFile}" />
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="cacheSeconds" value="${message.cache_seconds}" />
+		<property name="useCodeAsDefaultMessage" value="true" />
+		<property name="basenames">
+			<list>
+				<value>${message.common_path}</value>
+				<value>${message.shop_path}</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.FixedLocaleResolver">
+		<property name="defaultLocale" value="${locale}" />
+	</bean>
+	
+	<bean id="imageCaptchaService" class="com.octo.captcha.service.image.DefaultManageableImageCaptchaService">
+		<property name="captchaEngine">
+			<bean class="com.whir.ht.cms.CaptchaEngine" />
+		</property>
+		<property name="minGuarantedStorageDelayInSeconds" value="3600" />
+	</bean>
+
+	<!-- Production 环境 -->
+ 	<beans profile="production">
+ 		
+ 	    <!-- 数据源配置, 使用 BoneCP 数据库连接池 -->
+		<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close"> 
+		    <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
+		    <property name="driverClassName" value="${jdbc.driver}" />
+		    
+			<!-- 基本属性 url、user、password -->
+			<property name="url" value="${jdbc.url}" />
+			<property name="username" value="${jdbc.username}" />
+			<property name="password" value="${jdbc.password}" />
+			
+			<!-- 配置初始化大小、最小、最大 -->
+			<property name="initialSize" value="${jdbc.pool.minIdle}" />
+			<property name="minIdle" value="${jdbc.pool.minIdle}" /> 
+			<property name="maxActive" value="${jdbc.pool.maxActive}" />
+			
+			<!-- 配置获取连接等待超时的时间 -->
+			<property name="maxWait" value="60000" />
+			
+			<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+			<property name="timeBetweenEvictionRunsMillis" value="60000" />
+			
+			<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+			<property name="minEvictableIdleTimeMillis" value="300000" />
+			
+			<property name="validationQuery" value="SELECT 'x'" />
+			<property name="testWhileIdle" value="true" />
+			<property name="testOnBorrow" value="false" />
+			<property name="testOnReturn" value="false" />
+			
+			<!-- 打开PSCache，并且指定每个连接上PSCache的大小（Oracle使用）
+			<property name="poolPreparedStatements" value="true" />
+			<property name="maxPoolPreparedStatementPerConnectionSize" value="20" /> -->
+			
+			<!-- 配置监控统计拦截的filters -->
+		    <property name="filters" value="stat" /> 
+		</bean>
+		
+		<!-- 数据源配置,使用应用内的c3p0数据库连接池 -->
+		<bean id="dataSourceSql" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	        <property name="driverClass" value="net.sourceforge.jtds.jdbc.Driver"/>
+	        <property name="jdbcUrl" value="jdbc:jtds:sqlserver://121.43.16.153:3433/gtdb81;tds=8.0;lastupdatecount=true;"/>
+	        <property name="user" value="haitian_wanhu"/>
+	        <property name="password" value="abc123"/>
+	        <property name="initialPoolSize" value="5"/>
+	        <property name="minPoolSize" value="5"/>
+	        <property name="maxPoolSize" value="100"/>
+	        <property name="checkoutTimeout" value="5000"/>
+	        <property name="maxIdleTime" value="1800"/>
+	        <property name="idleConnectionTestPeriod" value="3000"/>
+	        <property name="acquireIncrement" value="3"/>
+	    </bean>
+	    
+	    <bean id = "sqlJdbcTemplate"
+	        class = "org.springframework.jdbc.core.JdbcTemplate">    
+	        <property name = "dataSource" ref="dataSourceSql"/>    
+	    </bean>
+	    
+	    
+	    <!-- 数据源配置,使用应用内的c3p0数据库连接池 -->	    
+	    <bean id="dataSourceForum" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+			<!-- Connection Info -->
+			<property name="driverClassName" value="${forum.jdbc.driver}" />
+			<property name="url" value="${forum.jdbc.url}" />
+			<property name="username" value="${forum.jdbc.username}" />
+			<property name="password" value="${forum.jdbc.password}" />
+			<property name="maxActive" value="${jdbc.pool.maxActive}" />
+			<property name="maxIdle" value="20" />
+			<property name="minIdle" value="0" />
+			<property name="defaultAutoCommit" value="true" />
+			<!-- 连接Idle10分钟后超时，每1分钟检查一次 -->
+			<property name="timeBetweenEvictionRunsMillis" value="60000" />
+			<property name="minEvictableIdleTimeMillis" value="600000" />
+		</bean>
+	    
+	    <bean id = "forumJdbcTemplate"
+	        class = "org.springframework.jdbc.core.JdbcTemplate">    
+	        <property name = "dataSource" ref="dataSourceForum"/>    
+	    </bean>
+		
+		<!-- 数据源配置, 使用应用服务器的数据库连接池 
+		<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/gdweb" />-->
+	
+		<!-- 数据源配置, 不使用连接池 
+		<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+			<property name="driverClassName" value="${jdbc.driver}" />
+			<property name="url" value="${jdbc.url}" />
+			<property name="username" value="${jdbc.username}"/>
+			<property name="password" value="${jdbc.password}"/>
+		</bean>-->
+		
+	</beans>
+	
+</beans>

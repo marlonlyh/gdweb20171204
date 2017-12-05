@@ -1,0 +1,9 @@
+<chart caption="Software Testing Report" xAxisName="Type of Bugs" PYAxisName="No of Bugs" showValues='0'>
+   <set label="GUI" value="205"/>
+   <set label="Functional" value="165"/>
+   <set label="Navigation" value="85"/>
+   <set label="Cross Platform" value="62"/>
+   <set label="Hardware" value="73"/>
+   <set label="Runtime" value="131"/>
+   <set label="Load Condition" value="109"/>
+</chart>
